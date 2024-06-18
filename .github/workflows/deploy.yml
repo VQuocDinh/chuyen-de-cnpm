@@ -23,7 +23,7 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
     - name: Build and push Docker image
-       run: |
+      run: |
         IMAGE_NAME="${{ secrets.DOCKER_HUB_USERNAME }}/chuyen-de-cnpm:latest"
         
         # Build Docker image
