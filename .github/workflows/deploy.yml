@@ -1,31 +1,34 @@
-name: Deploy WordPress
+name: Deploy to Localhost
 
 on:
   push:
     branches:
-      - main  # Thay đổi branch nếu cần
+      - main
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
 
-      - name: Sync files
-        run: |
-          rsync -avz --delete \
-          -e "ssh -o StrictHostKeyChecking=no" \
-          --exclude '.git*' \
-          --exclude 'node_modules' \
-          ./ username@your_server:/path/to/your/wordpress/directory
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Set permissions
-        run: |
-          ssh username@your_server "chown -R www-data:www-data /path/to/your/wordpress/directory"
+    - name: Build and push Docker image
+      run: |
+        docker build . -t my-wordpress-image
+        docker tag my-wordpress-image:latest ${DOCKER_HUB_USERNAME}/my-wordpress-image:latest
+        docker push ${DOCKER_HUB_USERNAME}/my-wordpress-image:latest
+
+    - name: Deploy to Docker
+      run: |
+        docker-compose down
+        docker-compose up -d
