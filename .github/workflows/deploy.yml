@@ -23,10 +23,14 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
     - name: Build and push Docker image
-      run: |
-        docker build . -t my-wordpress-image
-        docker tag my-wordpress-image:latest ${DOCKER_HUB_USERNAME}/chuyen-de-cnpm:latest
-        docker push ${DOCKER_HUB_USERNAME}/my-wordpress-image:latest
+       run: |
+        IMAGE_NAME="${{ secrets.DOCKER_HUB_USERNAME }}/chuyen-de-cnpm:latest"
+        
+        # Build Docker image
+        docker build . -t $IMAGE_NAME
+        
+        # Push Docker image
+        docker push $IMAGE_NAME
 
     - name: Deploy to Docker
       run: |
